@@ -58,6 +58,15 @@ def main():
     manifest_text = open(manifest_file, 'r').read()
     manifest = parse_manifest(manifest_text)
 
+    print('*********************')
+    print(poptions)
+    import os
+    import os.path
+    print(os.getcwd())
+    print(os.listdir(os.getcwd() + '/services/delivery/'))
+    print(os.path.exists(os.getcwd() + '/services/delivery/requirements.txt'))
+    print('*********************')
+
     if poptions.pex_root:
         ENV.set('PEX_ROOT', poptions.pex_root)
     else:
