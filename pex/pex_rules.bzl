@@ -132,7 +132,7 @@ def _pex_library_impl(ctx):
   )
 
 
-def _gen_manifest(py, runfiles):
+def _gen_manifest(py, runfiles, strip_pex_path_prefixes):
   """Generate a manifest for pex_wrapper.
 
   Returns:
@@ -149,6 +149,12 @@ def _gen_manifest(py, runfiles):
     dpath = f.short_path
     if dpath.startswith("../"):
       dpath = dpath[3:]
+
+    for prefix in strip_pex_path_prefixes:
+      if dpath.startswith(prefix):
+         dpath = dpath[len(prefix):]
+         break
+
     pex_files.append(
         struct(
             src = f.path,
@@ -196,7 +202,7 @@ def _pex_binary_impl(ctx):
   manifest_file = ctx.new_file(
       ctx.configuration.bin_dir, deploy_pex, '_manifest')
 
-  manifest = _gen_manifest(py, runfiles)
+  manifest = _gen_manifest(py, runfiles, ctx.attr.strip_pex_path_prefixes)
 
   ctx.file_action(
       output = manifest_file,
@@ -328,7 +334,6 @@ pex_attrs = {
                             allow_files = repo_file_types),
     "data": attr.label_list(allow_files = True,
                             cfg = "data"),
-
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
         default = Label("//pex:pex_wrapper"),
@@ -357,6 +362,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
         default = True,
         mandatory = False,
     ),
+    "strip_pex_path_prefixes": attr.string_list(),
 })
 
 pex_library = rule(
