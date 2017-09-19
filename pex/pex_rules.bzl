@@ -470,6 +470,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
                size=None,
                timeout=None,
                tags=[],
+               launcher_template=None,
                **kwargs):
   """A variant of pex_test that uses py.test to run one or more sets of tests.
 
@@ -520,6 +521,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
       srcs = srcs,
       timeout = timeout,
       tags = tags,
+      launcher_template = launcher_template,
   )
 
 
