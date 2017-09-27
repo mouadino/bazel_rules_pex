@@ -306,12 +306,16 @@ def _get_runfile_path(ctx, f):
 def _pex_pytest_impl(ctx):
   test_runner = ctx.executable.runner
   test_dirs = ctx.attr.test_dirs
+  pass_files = ctx.attr.pass_files
   output_file = ctx.outputs.executable
 
-  if test_dirs:
-    test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, d) for d in test_dirs]
+  if pass_files:
+    if test_dirs:
+      test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, d) for d in test_dirs]
+    else:
+      test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
   else:
-    test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
+      test_file_paths = []
 
   ctx.template_action(
       template = ctx.file.launcher_template,
@@ -474,6 +478,9 @@ _pytest_pex_test = rule(
             allow_files = True,
             flags = ["DIRECT_COMPILE_TIME_INPUT"]
         ),
+        "pass_files": attr.bool(
+            default = True,
+        ),
     }),
 )
 
@@ -487,6 +494,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
                tags=[],
                launcher_template=None,
                test_dirs=[],
+               pass_files=True,
                **kwargs):
   """A variant of pex_test that uses py.test to run one or more sets of tests.
 
@@ -531,6 +539,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
       runner = ":%s_runner" % name,
       args = args,
       test_dirs = test_dirs,
+      pass_files = pass_files,
       data = data,
       flaky = flaky,
       local = local,
