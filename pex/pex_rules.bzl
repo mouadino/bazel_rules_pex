@@ -262,7 +262,7 @@ def _pex_binary_impl(ctx):
           'PATH': '/bin:/usr/bin:/usr/local/bin',
           'PEX_VERBOSE': str(ctx.attr.pex_verbosity),
           'PEX_PYTHON': str(ctx.attr.interpreter),
-          'PEX_ROOT': '.pex',  # So pex doesn't try to unpack into $HOME/.pex
+          #'PEX_ROOT': '.pex',  # So pex doesn't try to unpack into $HOME/.pex
       },
       arguments = arguments,
   )
