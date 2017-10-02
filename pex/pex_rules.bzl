@@ -231,11 +231,12 @@ def _pex_binary_impl(ctx):
     arguments += ["--repo", repo]
   for egg in py.transitive_eggs:
     arguments += ["--find-links", egg.dirname]
+  if ctx.attr.cache_dir:
+     arguments += ["--cache-dir", ctx.attr.cache_dir]
   arguments += [
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
       "--entry-point", main_pkg,
       "--output-file", deploy_pex.path,
-      "--cache-dir", ".pex/build",
       manifest_file.path,
   ]
 
@@ -262,7 +263,7 @@ def _pex_binary_impl(ctx):
           'PATH': '/bin:/usr/bin:/usr/local/bin',
           'PEX_VERBOSE': str(ctx.attr.pex_verbosity),
           'PEX_PYTHON': str(ctx.attr.interpreter),
-          #'PEX_ROOT': '.pex',  # So pex doesn't try to unpack into $HOME/.pex
+          'PEX_ROOT': ".pex",  # So pex doesn't try to unpack into $HOME/.pex
       },
       arguments = arguments,
   )
@@ -356,6 +357,7 @@ pex_attrs = {
                             allow_files = repo_file_types),
     "data": attr.label_list(allow_files = True,
                             cfg = "data"),
+    "cache_dir": attr.string(),
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
         default = Label("//pex:pex_wrapper"),
