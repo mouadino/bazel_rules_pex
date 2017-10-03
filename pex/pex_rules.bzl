@@ -294,6 +294,7 @@ def _get_runfile_path(ctx, f):
   # For directories we need to fetch the path by checking one of the files.
   # XXX: In case directory is empty this will fail.
   if hasattr(f, 'files'):
+    print(f.files.to_list())
     short_path = f.files.to_list()[0].short_path.rsplit('/', 1)[0]
   else:
     short_path = f.short_path
@@ -310,13 +311,16 @@ def _pex_pytest_impl(ctx):
   pass_files = ctx.attr.pass_files
   output_file = ctx.outputs.executable
 
-  if pass_files:
-    if test_dirs:
-      test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, d) for d in test_dirs]
-    else:
-      test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
+  print("**************")
+  print(test_dirs)
+  if test_dirs:
+    tests = depset()
+    for d in test_dirs:
+       tests += ["${RUNFILES}/" + _get_runfile_path(ctx, d)]
+    test_file_paths = tests.to_list()
   else:
-      test_file_paths = []
+    test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
+  print(test_file_paths)
 
   ctx.template_action(
       template = ctx.file.launcher_template,
@@ -524,7 +528,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
 
   pex_binary(
       name = "%s_runner" % name,
-      srcs = srcs,
+      #srcs = srcs,
       deps = deps,
       data = data,
       eggs = eggs + [
